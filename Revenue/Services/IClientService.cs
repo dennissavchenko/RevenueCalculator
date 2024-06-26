@@ -1,5 +1,4 @@
 using Revenue.DTOs;
-using Revenue.Entities;
 
 namespace Revenue.Services;
 

@@ -1,7 +1,8 @@
+using Revenue.Constant;
 using Revenue.DTOs;
 using Revenue.Entities;
 using Revenue.Repositories;
-using Test2.Exceptions;
+using Revenue.Exceptions;
 
 namespace Revenue.Services;
 
@@ -17,9 +18,9 @@ public class ClientService : IClientService
     public async Task AddIndividualClientAsync(IndividualClientDto individualClient)
     {
 
-        if (individualClient.PESEL.Length != 11)
+        if (individualClient.PESEL.Length != ClientConstants.PeselLength)
         {
-            throw new BadRequestException("PESEL has to consist of 11 digits!");
+            throw new BadRequestException("PESEL has to consist of " + ClientConstants.PeselLength + " digits!");
         }
 
         if (await _clientRepository.PeselExistsAsync(individualClient.PESEL))
@@ -43,9 +44,9 @@ public class ClientService : IClientService
     public async Task AddCompanyClientAsync(CompanyClientDto companyClient)
     {
        
-        if (companyClient.KRS.Length != 14 && companyClient.KRS.Length != 9)
+        if (companyClient.KRS.Length != ClientConstants.KrsLength1 && companyClient.KRS.Length != ClientConstants.KrsLength2)
         {
-            throw new BadRequestException("KRS is 9 or 14 digits number!");
+            throw new BadRequestException("KRS is " + ClientConstants.KrsLength1 + " or " + ClientConstants.KrsLength2 + " digits number!");
         }
         
         if (await _clientRepository.KrsExistsAsync(companyClient.KRS))

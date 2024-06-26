@@ -13,4 +13,6 @@ public interface IClientRepository
     public Task<bool> CompanyClientExistsAsync(int clientId);
     public Task UpdateIndividualClientAsync(int clientId, UpdateIndividualClientDto individualClient);
     public Task UpdateCompanyClientAsync(int clientId, UpdateCompanyClientDto companyClient);
+    public Task<bool> HasContractOrSubscriptionAsync(int clientId);
+    public Task<bool> ClientExistsAsync(int clientId);
 }

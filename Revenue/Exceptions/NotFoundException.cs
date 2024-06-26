@@ -1,4 +1,4 @@
-namespace Test2.Exceptions;
+namespace Revenue.Exceptions;
 
 public class NotFoundException : Exception
 {

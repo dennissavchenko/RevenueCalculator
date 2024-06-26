@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Revenue.Context;
 using Revenue.DTOs;
 using Revenue.Entities;
-using Test2.Exceptions;
+using Revenue.Exceptions;
 
 namespace Revenue.Repositories;
 
@@ -40,7 +40,7 @@ public class ClientRepository : IClientRepository
 
     public async Task<bool> IndividualClientExistsAsync(int clientId)
     {
-        return await _systemContext.IndividualClients.AnyAsync(x => x.IdClient == clientId);
+        return await _systemContext.IndividualClients.AnyAsync(x => x.IdClient == clientId && x.IsDeleted == false);
     }
     
     public async Task<bool> CompanyClientExistsAsync(int clientId)
@@ -71,5 +71,18 @@ public class ClientRepository : IClientRepository
         client.Email = companyClient.Email;
 
         await _systemContext.SaveChangesAsync();
+    }
+
+    // Add subscription check
+    public async Task<bool> HasContractOrSubscriptionAsync(int clientId)
+    {
+        return await _systemContext.Clients
+            .Where(x => x.IdClient == clientId)
+            .AnyAsync(x => x.Contracts.Any());
+    }
+
+    public async Task<bool> ClientExistsAsync(int clientId)
+    {
+        return await _systemContext.Clients.AnyAsync(x => x.IdClient == clientId);
     }
 }

@@ -1,10 +1,7 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Revenue.Context;
 using Revenue.DTOs;
-using Revenue.Entities;
 using Revenue.Services;
-using Test2.Exceptions;
+using Revenue.Exceptions;
 
 namespace Revenue.Controllers;
 
@@ -67,7 +64,7 @@ public class ClientController : ControllerBase
         try
         {
             await _clientService.UpdateCompanyClientAsync(clientId, companyClient);
-            return StatusCode(StatusCodes.Status201Created);
+            return NoContent();
         }
         catch (BadRequestException e)
         {
