@@ -16,7 +16,6 @@ public class SubscriptionPaymentRepository : ISubscriptionPaymentRepository
     public async Task AddSubscriptionPaymentAsync(SubscriptionPayment subscriptionPayment)
     {
         await _systemContext.SubscriptionPayments.AddAsync(subscriptionPayment);
-        await _systemContext.SaveChangesAsync();
     }
 
     public async Task<double> GetSubscriptionsCurrentRevenueAsync()

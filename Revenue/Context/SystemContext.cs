@@ -5,11 +5,6 @@ namespace Revenue.Context;
 
 public class SystemContext : DbContext
 {
-    public SystemContext()
-    {
-       
-    }
-    
     public DbSet<Client> Clients { get; set; }
     public DbSet<Software> Software { get; set; }
     public DbSet<Contract> Contracts { get; set; }

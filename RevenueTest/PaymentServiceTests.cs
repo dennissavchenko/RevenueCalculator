@@ -36,12 +36,9 @@ public class PaymentServiceTests
         );
     }
 
-    // Unit tests for IssueContractPaymentAsync method
-
     [Fact]
     public async Task IssueContractPaymentAsync_ValidPayment_AddsPayment()
     {
-        // Arrange
         var contractPaymentDto = new ContractPaymentDto
         {
             IdContract = 1,
@@ -61,10 +58,8 @@ public class PaymentServiceTests
         _contactRepositoryMock.Setup(repo => repo.GetContractAsync(contractPaymentDto.IdContract)).ReturnsAsync(contract);
         _contractPaymentRepositoryMock.Setup(repo => repo.GetContractPaymentsSumAsync(contractPaymentDto.IdContract)).ReturnsAsync(0);
 
-        // Act
         await _paymentService.IssueContractPaymentAsync(contractPaymentDto);
-
-        // Assert
+        
         _contractPaymentRepositoryMock.Verify(repo => repo.AddContractPaymentAsync(It.IsAny<ContractPayment>()), Times.Once);
         _contactRepositoryMock.Verify(repo => repo.SignContractAsync(contractPaymentDto.IdContract), Times.Once);
     }
@@ -72,7 +67,6 @@ public class PaymentServiceTests
     [Fact]
     public async Task IssueContractPaymentAsync_ContractDoesNotExist_ThrowsBadRequestException()
     {
-        // Arrange
         var contractPaymentDto = new ContractPaymentDto
         {
             IdContract = 1,
@@ -81,8 +75,7 @@ public class PaymentServiceTests
         };
 
         _contactRepositoryMock.Setup(repo => repo.ContractExistsAsync(contractPaymentDto.IdContract)).ReturnsAsync(false);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _paymentService.IssueContractPaymentAsync(contractPaymentDto));
         Assert.Equal("Contract with such an ID does not exist or was cancelled!", exception.Message);
     }
@@ -90,7 +83,6 @@ public class PaymentServiceTests
     [Fact]
     public async Task IssueContractPaymentAsync_AmountExceedsContractPrice_ThrowsBadRequestException()
     {
-        // Arrange
         var contractPaymentDto = new ContractPaymentDto
         {
             IdContract = 1,
@@ -109,8 +101,7 @@ public class PaymentServiceTests
         _contactRepositoryMock.Setup(repo => repo.ContractExistsAsync(contractPaymentDto.IdContract)).ReturnsAsync(true);
         _contactRepositoryMock.Setup(repo => repo.GetContractAsync(contractPaymentDto.IdContract)).ReturnsAsync(contract);
         _contractPaymentRepositoryMock.Setup(repo => repo.GetContractPaymentsSumAsync(contractPaymentDto.IdContract)).ReturnsAsync(50);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _paymentService.IssueContractPaymentAsync(contractPaymentDto));
         Assert.Equal("Amount issued is too big. You only need to pay 100 more!", exception.Message);
     }
@@ -118,7 +109,6 @@ public class PaymentServiceTests
     [Fact]
     public async Task IssueContractPaymentAsync_ContractAlreadySigned_ThrowsBadRequestException()
     {
-        // Arrange
         var contractPaymentDto = new ContractPaymentDto
         {
             IdContract = 1,
@@ -136,18 +126,14 @@ public class PaymentServiceTests
 
         _contactRepositoryMock.Setup(repo => repo.ContractExistsAsync(contractPaymentDto.IdContract)).ReturnsAsync(true);
         _contactRepositoryMock.Setup(repo => repo.GetContractAsync(contractPaymentDto.IdContract)).ReturnsAsync(contract);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _paymentService.IssueContractPaymentAsync(contractPaymentDto));
         Assert.Equal("Contract with such an ID is already payed and signed!", exception.Message);
     }
 
-    // Unit tests for IssueSubscriptionPaymentAsync method
-
     [Fact]
     public async Task IssueSubscriptionPaymentAsync_ValidPayment_AddsPayment()
     {
-        // Arrange
         var subscriptionPaymentDto = new SubscriptionPaymentDto
         {
             IdClient = 1,
@@ -168,11 +154,9 @@ public class PaymentServiceTests
         _subscriptionRepositoryMock.Setup(repo => repo.SubscriptionExistsAsync(subscriptionPaymentDto.IdSubscription)).ReturnsAsync(true);
         _subscriptionClientRepositoryMock.Setup(repo => repo.ClientAlreadySubscribedAsync(subscriptionPaymentDto.IdClient, subscriptionPaymentDto.IdSubscription)).ReturnsAsync(true);
         _subscriptionClientRepositoryMock.Setup(repo => repo.GetSubscriptionClientAsync(subscriptionPaymentDto.IdClient, subscriptionPaymentDto.IdSubscription)).ReturnsAsync(subscriptionClient);
-
-        // Act
+        
         await _paymentService.IssueSubscriptionPaymentAsync(subscriptionPaymentDto);
-
-        // Assert
+        
         _subscriptionPaymentRepositoryMock.Verify(repo => repo.AddSubscriptionPaymentAsync(It.IsAny<SubscriptionPayment>()), Times.Once);
         _subscriptionClientRepositoryMock.Verify(repo => repo.UpgradeNextRenewalDateAsync(subscriptionPaymentDto.IdClient, subscriptionPaymentDto.IdSubscription), Times.Once);
     }
@@ -180,7 +164,6 @@ public class PaymentServiceTests
     [Fact]
     public async Task IssueSubscriptionPaymentAsync_ClientNotFound_ThrowsBadRequestException()
     {
-        // Arrange
         var subscriptionPaymentDto = new SubscriptionPaymentDto
         {
             IdClient = 1,
@@ -190,8 +173,7 @@ public class PaymentServiceTests
         };
 
         _clientRepositoryMock.Setup(repo => repo.ClientExistsAsync(subscriptionPaymentDto.IdClient)).ReturnsAsync(false);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _paymentService.IssueSubscriptionPaymentAsync(subscriptionPaymentDto));
         Assert.Equal("Client with such an ID was not found!", exception.Message);
     }
@@ -199,7 +181,6 @@ public class PaymentServiceTests
     [Fact]
     public async Task IssueSubscriptionPaymentAsync_SubscriptionNotFound_ThrowsBadRequestException()
     {
-        // Arrange
         var subscriptionPaymentDto = new SubscriptionPaymentDto
         {
             IdClient = 1,
@@ -210,8 +191,7 @@ public class PaymentServiceTests
 
         _clientRepositoryMock.Setup(repo => repo.ClientExistsAsync(subscriptionPaymentDto.IdClient)).ReturnsAsync(true);
         _subscriptionRepositoryMock.Setup(repo => repo.SubscriptionExistsAsync(subscriptionPaymentDto.IdSubscription)).ReturnsAsync(false);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _paymentService.IssueSubscriptionPaymentAsync(subscriptionPaymentDto));
         Assert.Equal("Subscription with such an ID was not found!", exception.Message);
     }
@@ -219,7 +199,6 @@ public class PaymentServiceTests
     [Fact]
     public async Task IssueSubscriptionPaymentAsync_ClientNotSubscribed_ThrowsBadRequestException()
     {
-        // Arrange
         var subscriptionPaymentDto = new SubscriptionPaymentDto
         {
             IdClient = 1,
@@ -231,8 +210,7 @@ public class PaymentServiceTests
         _clientRepositoryMock.Setup(repo => repo.ClientExistsAsync(subscriptionPaymentDto.IdClient)).ReturnsAsync(true);
         _subscriptionRepositoryMock.Setup(repo => repo.SubscriptionExistsAsync(subscriptionPaymentDto.IdSubscription)).ReturnsAsync(true);
         _subscriptionClientRepositoryMock.Setup(repo => repo.ClientAlreadySubscribedAsync(subscriptionPaymentDto.IdClient, subscriptionPaymentDto.IdSubscription)).ReturnsAsync(false);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _paymentService.IssueSubscriptionPaymentAsync(subscriptionPaymentDto));
         Assert.Equal("Client is not subscribed to the subscription!", exception.Message);
     }
@@ -240,7 +218,6 @@ public class PaymentServiceTests
     [Fact]
     public async Task IssueSubscriptionPaymentAsync_PaymentLate_CancelsSubscription()
     {
-        // Arrange
         var subscriptionPaymentDto = new SubscriptionPaymentDto
         {
             IdClient = 1,
@@ -261,8 +238,7 @@ public class PaymentServiceTests
         _subscriptionRepositoryMock.Setup(repo => repo.SubscriptionExistsAsync(subscriptionPaymentDto.IdSubscription)).ReturnsAsync(true);
         _subscriptionClientRepositoryMock.Setup(repo => repo.ClientAlreadySubscribedAsync(subscriptionPaymentDto.IdClient, subscriptionPaymentDto.IdSubscription)).ReturnsAsync(true);
         _subscriptionClientRepositoryMock.Setup(repo => repo.GetSubscriptionClientAsync(subscriptionPaymentDto.IdClient, subscriptionPaymentDto.IdSubscription)).ReturnsAsync(subscriptionClient);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _paymentService.IssueSubscriptionPaymentAsync(subscriptionPaymentDto));
         Assert.Equal("Payment is late. We have to cancel the client's subscriptions!", exception.Message);
     }
@@ -270,7 +246,6 @@ public class PaymentServiceTests
     [Fact]
     public async Task IssueSubscriptionPaymentAsync_AlreadyPaidThisPeriod_ThrowsBadRequestException()
     {
-        // Arrange
         var subscriptionPaymentDto = new SubscriptionPaymentDto
         {
             IdClient = 1,
@@ -291,8 +266,7 @@ public class PaymentServiceTests
         _subscriptionRepositoryMock.Setup(repo => repo.SubscriptionExistsAsync(subscriptionPaymentDto.IdSubscription)).ReturnsAsync(true);
         _subscriptionClientRepositoryMock.Setup(repo => repo.ClientAlreadySubscribedAsync(subscriptionPaymentDto.IdClient, subscriptionPaymentDto.IdSubscription)).ReturnsAsync(true);
         _subscriptionClientRepositoryMock.Setup(repo => repo.GetSubscriptionClientAsync(subscriptionPaymentDto.IdClient, subscriptionPaymentDto.IdSubscription)).ReturnsAsync(subscriptionClient);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _paymentService.IssueSubscriptionPaymentAsync(subscriptionPaymentDto));
         Assert.Equal("You have already payed for your subscription this period!", exception.Message);
     }

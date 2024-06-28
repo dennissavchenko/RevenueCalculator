@@ -35,7 +35,6 @@ public class ContractServiceTests
     [Fact]
     public async Task CreateContractAsync_ValidContract_CreatesContractSuccessfully()
     {
-        // Arrange
         var contractDto = new ContractDto
         {
             IdClient = 1,
@@ -57,18 +56,15 @@ public class ContractServiceTests
         _clientRepositoryMock.Setup(repo => repo.HasContractOrSubscriptionAsync(contractDto.IdClient)).ReturnsAsync(false);
         _contactRepositoryMock.Setup(repo => repo.ActiveContractOfClientExistsAsync(contractDto.IdClient, contractDto.IdSoftware)).ReturnsAsync(false);
         _discountRepositoryMock.Setup(repo => repo.GetMaxDiscountAsync(contractDto.IdSoftware, It.IsAny<DateTime>())).ReturnsAsync(10);
-
-        // Act
+        
         await _contractService.CreateContractAsync(contractDto);
-
-        // Assert
+        
         _contactRepositoryMock.Verify(repo => repo.AddContractAsync(It.IsAny<Contract>()), Times.Once);
     }
 
     [Fact]
     public async Task CreateContractAsync_InvalidTimeRange_ThrowsBadRequestException()
     {
-        // Arrange
         var contractDto = new ContractDto
         {
             IdClient = 1,
@@ -80,28 +76,23 @@ public class ContractServiceTests
         _softwareRepositoryMock.Setup(repo => repo.SoftwareExistsAsync(contractDto.IdSoftware)).ReturnsAsync(true);
         _clientRepositoryMock.Setup(repo => repo.ClientExistsAsync(contractDto.IdClient)).ReturnsAsync(true);
         
-        // Act & Assert
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _contractService.CreateContractAsync(contractDto));
         Assert.Equal("The time range should be at least 3 days and at most 30 days.", exception.Message);
     }
 
-    // Add other tests for different scenarios here...
-
     [Fact]
     public async Task CreateContractAsync_SoftwareNotFound_ThrowsBadRequestException()
     {
-        // Arrange
         var contractDto = new ContractDto
         {
             IdClient = 1,
-            IdSoftware = 999, // Non-existent software ID
+            IdSoftware = 10,
             EndDate = DateTime.Today.AddDays(30),
             AdditionalYearsOfSupport = 1
         };
 
         _softwareRepositoryMock.Setup(repo => repo.SoftwareExistsAsync(contractDto.IdSoftware)).ReturnsAsync(false);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _contractService.CreateContractAsync(contractDto));
         Assert.Equal("Software with such an ID does not exist!", exception.Message);
     }
@@ -109,10 +100,9 @@ public class ContractServiceTests
     [Fact]
     public async Task CreateContractAsync_ClientNotFound_ThrowsBadRequestException()
     {
-        // Arrange
         var contractDto = new ContractDto
         {
-            IdClient = 999, // Non-existent client ID
+            IdClient = 10,
             IdSoftware = 1,
             EndDate = DateTime.Today.AddDays(30),
             AdditionalYearsOfSupport = 1
@@ -120,8 +110,7 @@ public class ContractServiceTests
 
         _softwareRepositoryMock.Setup(repo => repo.SoftwareExistsAsync(contractDto.IdSoftware)).ReturnsAsync(true);
         _clientRepositoryMock.Setup(repo => repo.ClientExistsAsync(contractDto.IdClient)).ReturnsAsync(false);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _contractService.CreateContractAsync(contractDto));
         Assert.Equal("Client with such an ID does not exist!", exception.Message);
     }
@@ -129,7 +118,6 @@ public class ContractServiceTests
     [Fact]
     public async Task CreateContractAsync_ActiveContractExistsForClient_ThrowsBadRequestException()
     {
-        // Arrange
         var contractDto = new ContractDto
         {
             IdClient = 1,
@@ -142,8 +130,7 @@ public class ContractServiceTests
         _clientRepositoryMock.Setup(repo => repo.ClientExistsAsync(contractDto.IdClient)).ReturnsAsync(true);
         _clientRepositoryMock.Setup(repo => repo.HasContractOrSubscriptionAsync(contractDto.IdClient)).ReturnsAsync(true);
         _contactRepositoryMock.Setup(repo => repo.ActiveContractOfClientExistsAsync(contractDto.IdClient, contractDto.IdSoftware)).ReturnsAsync(true);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _contractService.CreateContractAsync(contractDto));
         Assert.Equal("Client already has an active contract for the software!", exception.Message);
     }
@@ -151,21 +138,19 @@ public class ContractServiceTests
     [Fact]
     public async Task CreateContractAsync_InvalidAdditionalYearsOfSupport_ThrowsBadRequestException()
     {
-        // Arrange
         var contractDto = new ContractDto
         {
             IdClient = 1,
             IdSoftware = 1,
             EndDate = DateTime.Today.AddDays(30),
-            AdditionalYearsOfSupport = -1 // Invalid number of additional years of support
+            AdditionalYearsOfSupport = -1
         };
 
         _softwareRepositoryMock.Setup(repo => repo.SoftwareExistsAsync(contractDto.IdSoftware)).ReturnsAsync(true);
         _clientRepositoryMock.Setup(repo => repo.ClientExistsAsync(contractDto.IdClient)).ReturnsAsync(true);
         _clientRepositoryMock.Setup(repo => repo.HasContractOrSubscriptionAsync(contractDto.IdClient)).ReturnsAsync(false);
         _contactRepositoryMock.Setup(repo => repo.ActiveContractOfClientExistsAsync(contractDto.IdClient, contractDto.IdSoftware)).ReturnsAsync(false);
-
-        // Act & Assert
+        
         var exception = await Assert.ThrowsAsync<BadRequestException>(() => _contractService.CreateContractAsync(contractDto));
         Assert.Equal("Maximum number of additional years of support is 3", exception.Message);
     }

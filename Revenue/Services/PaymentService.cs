@@ -16,7 +16,6 @@ public class PaymentService : IPaymentService
     private readonly IClientRepository _clientRepository;
     private readonly ISubscriptionRepository _subscriptionRepository;
     private readonly ISubscriptionClientRepository _subscriptionClientRepository;
-    //private readonly SystemContext _systemContext;
 
     public PaymentService(IContactRepository contactRepository, IContractPaymentRepository contractPaymentRepository, IClientRepository clientRepository, ISubscriptionRepository subscriptionRepository, ISubscriptionClientRepository subscriptionClientRepository, ISubscriptionPaymentRepository subscriptionPaymentRepository/*, SystemContext systemContext*/)
     {
@@ -121,22 +120,6 @@ public class PaymentService : IPaymentService
             Date = payment.Date,
             IdSubscriptionClient = subscriptionClient.IdSubscriptionClient
         };
-
-        // using (var transaction = await _systemContext.Database.BeginTransactionAsync())
-        // {
-        //     try
-        //     {
-        //         
-        //
-        //         await transaction.CommitAsync();
-        //     }
-        //     catch
-        //     {
-        //         await transaction.RollbackAsync();
-        //         throw;
-        //     }
-        //     
-        // }
         
         await _subscriptionPaymentRepository.AddSubscriptionPaymentAsync(subscriptionPayment);
         await _subscriptionClientRepository.UpgradeNextRenewalDateAsync(payment.IdClient, payment.IdSubscription);
