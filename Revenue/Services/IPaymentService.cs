@@ -1,10 +1,10 @@
 using Revenue.DTOs;
-using Revenue.Entities;
 
 namespace Revenue.Services;
 
 public interface IPaymentService
 {
-    public Task IssuePaymentAsync(PaymentDto payment);
+    public Task IssueContractPaymentAsync(ContractPaymentDto contractPayment);
+    public Task IssueSubscriptionPaymentAsync(SubscriptionPaymentDto subscriptionPayment);
     
 }

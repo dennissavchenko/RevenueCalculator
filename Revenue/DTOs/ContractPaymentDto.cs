@@ -1,6 +1,6 @@
 namespace Revenue.DTOs;
 
-public class PaymentDto
+public class ContractPaymentDto
 {
     public double Amount { get; set; }
     public DateTime Date { get; set; }

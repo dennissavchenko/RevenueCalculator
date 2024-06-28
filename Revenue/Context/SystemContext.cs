@@ -5,15 +5,23 @@ namespace Revenue.Context;
 
 public class SystemContext : DbContext
 {
+    public SystemContext()
+    {
+       
+    }
+    
     public DbSet<Client> Clients { get; set; }
-    public DbSet<ClientType> ClientTypes { get; set; }
-    public DbSet<SoftwareCategory> SoftwareCategories { get; set; }
-    public DbSet<Software> Softwares { get; set; }
+    public DbSet<Software> Software { get; set; }
     public DbSet<Contract> Contracts { get; set; }
     public DbSet<Discount> Discounts { get; set; }
     public DbSet<ContractPayment> ContractPayments { get; set; }
     public DbSet<IndividualClient> IndividualClients { get; set; }
     public DbSet<CompanyClient> CompanyClients { get; set; }
+    public DbSet<Subscription> Subscriptions { get; set; }
+    public DbSet<SubscriptionPayment> SubscriptionPayments { get; set; }
+    public DbSet<SubscriptionClient> SubscriptionClients { get; set; }
+    public DbSet<Employee> Employees { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -182,6 +190,113 @@ public class SystemContext : DbContext
                 .HasForeignKey(x => x.IdPaymentStatus);
         });
         
+        modelBuilder.Entity<Employee>(entity =>
+        {
+            entity.HasKey(x => x.IdEmployee);
+            entity.ToTable("Employee");
+            entity
+                .Property(x => x.IdEmployee)
+                .ValueGeneratedOnAdd()
+                .IsRequired();
+            entity
+                .Property(x => x.Username)
+                .HasMaxLength(100)
+                .IsRequired();
+            entity
+                .Property(x => x.Password)
+                .HasMaxLength(100)
+                .IsRequired();
+            entity
+                .HasOne(x => x.EmployeeRole)
+                .WithMany(x => x.Employees)
+                .HasForeignKey(x => x.IdEmployeeRole);
+        });
+        
+        modelBuilder.Entity<EmployeeRole>(entity =>
+        {
+            entity.HasKey(x => x.IdEmployeeRole);
+            entity.ToTable("EmployeeRole");
+            entity
+                .Property(x => x.IdEmployeeRole)
+                .ValueGeneratedOnAdd()
+                .IsRequired();
+            entity
+                .Property(x => x.Name)
+                .HasMaxLength(100)
+                .IsRequired();
+        });
+        
+        modelBuilder.Entity<Subscription>(entity =>
+        {
+            entity.HasKey(x => x.IdSubscription);
+            entity.ToTable("Subscription");
+            entity
+                .Property(x => x.IdSubscription)
+                .ValueGeneratedOnAdd()
+                .IsRequired();
+            entity
+                .Property(x => x.Name)
+                .HasMaxLength(100)
+                .IsRequired();
+            entity
+                .Property(x => x.Price)
+                .IsRequired();
+            entity
+                .Property(x => x.RenewalPeriodDays)
+                .IsRequired();
+            entity
+                .HasOne(x => x.Software)
+                .WithMany(x => x.Subscriptions)
+                .HasForeignKey(x => x.IdSoftware);
+        });
+        
+        modelBuilder.Entity<SubscriptionPayment>(entity =>
+        {
+            entity.HasKey(x => x.IdSubscriptionPayment);
+            entity.ToTable("SubscriptionPayment");
+            entity
+                .Property(x => x.IdSubscriptionPayment)
+                .ValueGeneratedOnAdd()
+                .IsRequired();
+            entity
+                .Property(x => x.Date)
+                .IsRequired();
+            entity
+                .Property(x => x.Amount)
+                .IsRequired();
+            entity
+                .HasOne(x => x.SubscriptionClient)
+                .WithMany(x => x.SubscriptionPayments)
+                .HasForeignKey(x => x.IdSubscriptionClient);
+        });
+        
+        modelBuilder.Entity<SubscriptionClient>(entity =>
+        {
+            entity.HasKey(x => x.IdSubscriptionClient);
+            entity.ToTable("SubscriptionClient");
+            entity
+                .Property(x => x.IdSubscriptionClient)
+                .ValueGeneratedOnAdd()
+                .IsRequired();
+            entity
+                .Property(x => x.IsCancelled)
+                .IsRequired();
+            entity
+                .Property(x => x.Price)
+                .IsRequired();
+            entity
+                .Property(x => x.NextPaymentDate)
+                .IsRequired();
+            entity
+                .HasOne(x => x.Client)
+                .WithMany(x => x.SubscriptionClients)
+                .HasForeignKey(x => x.IdClient);
+            entity
+                .HasOne(x => x.Subscription)
+                .WithMany(x => x.SubscriptionClients)
+                .HasForeignKey(x => x.IdSubscription);
+        });
+        
         modelBuilder.Entity<Discount>(entity =>
         {
             entity.HasKey(x => x.IdDiscount);
@@ -251,7 +366,8 @@ public class SystemContext : DbContext
             entity.ToTable("ClientType");
             entity
                 .Property(x => x.ClientTypeId)
-                .IsRequired();
+                .IsRequired()
+                .ValueGeneratedOnAdd();
             entity
                 .Property(x => x.Name)
                 .HasMaxLength(100)

@@ -43,11 +43,11 @@ public class ContractService : IContractService
             throw new BadRequestException("Client with such an ID does not exist!");
         }
         
-        if (await _contactRepository.ActiveContractOfClientExists(contract.IdClient, contract.IdSoftware))
+        if (await _contactRepository.ActiveContractOfClientExistsAsync(contract.IdClient, contract.IdSoftware))
         {
             throw new BadRequestException("Client already has an active contract for the software!");
         }
-
+        
         if (contract.AdditionalYearsOfSupport < 0 ||
             contract.AdditionalYearsOfSupport > ContractConstants.MaxAdditionalYearsOfSupport)
         {
@@ -58,13 +58,13 @@ public class ContractService : IContractService
 
         double discount = await _discountRepository.GetMaxDiscountAsync(contract.IdSoftware, today);
 
-        double additionalDiscount = 0;
+        double loyalClientDiscount = 0;
 
-        if (await _clientRepository.HasContractOrSubscriptionAsync(contract.IdClient)) additionalDiscount = 0.05;
+        if (await _clientRepository.HasContractOrSubscriptionAsync(contract.IdClient)) loyalClientDiscount = ContractConstants.LoyalClientDiscount;
 
-        double price = software.UpfrontCost - software.UpfrontCost * (discount / 100) + contract.AdditionalYearsOfSupport * 1000;
+        double price = software.UpfrontCost - software.UpfrontCost * (discount / 100) + contract.AdditionalYearsOfSupport * ContractConstants.ExtraYearOfSupportPrice;
 
-        price -= price * additionalDiscount;
+        price -= price * loyalClientDiscount;
         
         var newContract = new Contract
         {
@@ -79,7 +79,7 @@ public class ContractService : IContractService
             IdClient = contract.IdClient
         };
 
-        await _contactRepository.CreateContractAsync(newContract);
+        await _contactRepository.AddContractAsync(newContract);
 
     }
 }

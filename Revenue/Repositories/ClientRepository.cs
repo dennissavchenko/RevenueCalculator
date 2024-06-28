@@ -72,17 +72,18 @@ public class ClientRepository : IClientRepository
 
         await _systemContext.SaveChangesAsync();
     }
-
-    // Add subscription check
     public async Task<bool> HasContractOrSubscriptionAsync(int clientId)
     {
         return await _systemContext.Clients
             .Where(x => x.IdClient == clientId)
-            .AnyAsync(x => x.Contracts.Any());
+            .AnyAsync(x => x.Contracts.Any() || x.SubscriptionClients.Any());
     }
 
     public async Task<bool> ClientExistsAsync(int clientId)
     {
-        return await _systemContext.Clients.AnyAsync(x => x.IdClient == clientId);
+        var client = await _systemContext.Clients.Where(x => x.IdClient == clientId).Include(x => x.ClientType).SingleOrDefaultAsync();
+        if (client == null) return false;
+        if (client.ClientType.Name.Equals("Individual")) return await IndividualClientExistsAsync(clientId);
+        return true;
     }
 }

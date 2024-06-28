@@ -9,4 +9,5 @@ public abstract class Client
     public int ClientTypeId { get; set; }
     public virtual ClientType ClientType { get; set; }
     public virtual ICollection<Contract> Contracts { get; set; }
+    public virtual ICollection<SubscriptionClient> SubscriptionClients { get; set; }
 }

@@ -13,7 +13,7 @@ public class ContactRepository : IContactRepository
         _systemContext = systemContext;
     }
 
-    public async Task CreateContractAsync(Contract contract)
+    public async Task AddContractAsync(Contract contract)
     {
         await _systemContext.Contracts.AddAsync(contract);
         await _systemContext.SaveChangesAsync();
@@ -44,8 +44,28 @@ public class ContactRepository : IContactRepository
     }
 
     // I assume that active is the one which is not cancelled
-    public async Task<bool> ActiveContractOfClientExists(int clientId, int softwareId)
+    public async Task<bool> ActiveContractOfClientExistsAsync(int clientId, int softwareId)
     {
         return await _systemContext.Contracts.AnyAsync(x => x.IdClient == clientId && x.IdSoftware == softwareId && !x.IsCancelled);
+    }
+
+    public async Task<double> GetContactsCurrentRevenueAsync()
+    {
+        return await _systemContext.Contracts.Where(x => x.IsSigned && !x.IsCancelled).SumAsync(x => x.Price);
+    }
+
+    public async Task<double> GetContactsCurrentRevenueForProductAsync(int softwareId)
+    {
+        return await _systemContext.Contracts.Where(x => x.IsSigned && x.IdSoftware == softwareId && !x.IsCancelled).SumAsync(x => x.Price);
+    }
+
+    public async Task<double> GetContactsPredictedRevenueAsync()
+    {
+        return await _systemContext.Contracts.Where(x => !x.IsCancelled).SumAsync(x => x.Price);
+    }
+
+    public async Task<double> GetContactsPredictedRevenueForProductAsync(int softwareId)
+    {
+        return await _systemContext.Contracts.Where(x => x.IdSoftware == softwareId && !x.IsCancelled).SumAsync(x => x.Price);
     }
 }

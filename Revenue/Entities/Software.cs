@@ -12,4 +12,5 @@ public class Software
     public virtual SoftwareCategory SoftwareCategory { get; set; }
     public virtual ICollection<Discount> Discounts { get; set; }
     public virtual ICollection<Contract> Contracts { get; set; }
+    public virtual ICollection<Subscription> Subscriptions { get; set; }
 }

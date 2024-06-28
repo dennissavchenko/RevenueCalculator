@@ -15,12 +15,12 @@ public class SoftwareRepository : ISoftwareRepository
     
     public async Task<Software> GetSoftwareAsync(int softwareId)
     {
-        return await _systemContext.Softwares.Where(x => x.IdSoftware == softwareId).SingleAsync();
+        return await _systemContext.Software.Where(x => x.IdSoftware == softwareId).SingleAsync();
     }
 
     public async Task<bool> SoftwareExistsAsync(int softwareId)
     {
-        return await _systemContext.Softwares.AnyAsync(x => x.IdSoftware == softwareId);
+        return await _systemContext.Software.AnyAsync(x => x.IdSoftware == softwareId);
     }
     
 }
